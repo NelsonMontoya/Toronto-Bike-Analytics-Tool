@@ -33,7 +33,7 @@ def mock_data():
         'End Station Name': [f'E{i}' for i in range(6)],
         'Bike Id': [10001, 10002, 10003, 10004, 10005, 10006],
         'User Type': ['Subscriber', 'Casual', 'Subscriber', 'Casual', 'Subscriber', 'Subscriber'],
-        'Model': ['A', 'NULL', 'A', 'A', 'B', 'B'],
+        'Model': ['A', '', 'A', 'A', 'B', 'B'],
     })
 
 
