@@ -1,0 +1,12 @@
+# pyproject.toml
+#
+#[tool.pytest.ini_options]
+## This tells pytest to look for test files in the 'tests' directory
+## and, more importantly, tells it where the root of your source package is.
+## The 'src' setting is crucial for resolving imports like 'from src.data_processor...'.
+#pythonpath = ["src"]
+#testpaths = ["tests"]
+
+# Example in pyproject.toml
+[tool.pytest.ini_options]
+pythonpath = ["."]
