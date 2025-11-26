@@ -26,7 +26,7 @@ def load_and_clean_data(data_path: str) -> pd.DataFrame:
     try:
         # Calls the successfully tested function from US-1
         df_clean = prepare_data(data_path)
-        st.success("✅ Data successfully loaded and cleaned!")
+        # st.success("✅ Data successfully loaded and cleaned!")
         return df_clean
     except Exception as e:
         st.error(f"❌ ERROR during data processing: {e}")
@@ -39,7 +39,7 @@ def main():
     # --- UI Setup ---
     st.title("🚴 Toronto Bike-Sharing Analytics Tool")
     st.markdown("---")
-    st.header("Stage 1: Data Preparation Status (US-1 Complete)")
+    # st.header("Stage 1: Data Preparation Status (US-1 Complete)")
 
     # Define the data path (Adjust this path if your file is located elsewhere)
     data_file_path = os.path.join(os.getcwd(), 'data', 'bike_share_data.csv')
@@ -63,13 +63,13 @@ def main():
 
         # Display the first few rows of the cleaned data to confirm quality
         st.markdown("#### Preview of Cleaned Data (First 5 Rows)")
-        st.dataframe(cleaned_data.head(), use_container_width=True)
+        st.dataframe(cleaned_data.head(), width='stretch')
 
         # Confirmation of data types (checks AC 2 from US-1)
         st.markdown("#### Data Type Confirmation")
         # Display only the critical columns to check for datetime conversion
         try:
-            st.dataframe(cleaned_data[['Start Time', 'End Time']].dtypes.to_frame(), use_container_width=True)
+            st.dataframe(cleaned_data[['Start Time', 'End Time']].dtypes.to_frame(), width='stretch')
         except KeyError:
             st.warning("Could not find 'start_time' and 'end_time' columns for dtype check.")
 

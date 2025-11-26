@@ -53,3 +53,4 @@ def test_advanced_filter_combined(mock_advanced_filter_data):
     # Row 4 (10:30) is out by time. Row 5 (5 min) is out by duration.
     assert len(df_out) == 1
     assert df_out.index[0] == 1
+
