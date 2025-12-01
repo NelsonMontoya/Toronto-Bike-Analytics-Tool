@@ -2,6 +2,8 @@ import pandas as pd
 import pytest
 # Import the function we are about to test (it will cause the initial failure)
 from src.data_processor.loading_cleaning import prepare_data
+from data_processor.rider_categorization import categorize_riders, filter_by_rider_type
+
 
 # Taiga Task 1.1: Write failing test for null row count (RED).
 # Taiga Task 1.3: Write failing test for datetime conversion (RED).
@@ -21,9 +23,9 @@ def mock_data():
         # Columns used for cleaning/conversion:
         'Trip Id': [1, 2, 3, 4, 5, 6],
         'Start Time': ['2025-01-01 07:30:00', '2025-01-01 10:00:00', '2025-01-01 16:15:00',
-                       None, '2025-01-02 23:50:00', '2025-01-03 09:00:00'],  # <-- Null in Row 4
+       None, '2025-01-02 23:50:00', '2025-01-03 09:00:00'],  # <-- Null in Row 4
         'End Time': ['2025-01-01 07:45:30', '2025-01-01 10:20:00', '2025-01-01 16:15:00',
-                     '2025-01-01 12:00:00', '2025-01-03 00:10:00', '2025-01-03 09:15:30'],
+      '2025-01-01 12:00:00', '2025-01-03 00:10:00', '2025-01-03 09:15:30'],
         'Start Station Id': [100, 101, 102, 200, 104, 105],
         'Trip  Duration': [900, 1200, 0, 500, 1000, 800],
 
@@ -59,3 +61,4 @@ def test_datetime_conversion(mock_data, tmp_path):
     # This assertion initially fails because the conversion logic in prepare_data is missing.
     assert pd.api.types.is_datetime64_any_dtype(clean_df['Start Time'])
     assert pd.api.types.is_datetime64_any_dtype(clean_df['End Time'])
+
