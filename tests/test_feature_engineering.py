@@ -2,6 +2,7 @@ import pytest
 import pandas as pd
 from src.data_processor.feature_engineering import (
     label_rush_hour,
+    calculate_trip_metrics,
     AM_RUSH_START, AM_RUSH_END,
     PM_RUSH_START, PM_RUSH_END
 )

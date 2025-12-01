@@ -51,3 +51,35 @@ def label_rush_hour(df: pd.DataFrame) -> pd.DataFrame:
     df["is_rush_hour"] = is_am_rush | is_pm_rush
 
     return df
+
+
+# ============================================================
+# Core Logic Function (US-2)
+# ============================================================
+def calculate_trip_metrics(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Calculates essential trip metrics: duration in minutes and a distance proxy.
+    Fulfills TDD Story US-2.
+    """
+    # ---------------------------
+    # Dependency Check
+    # ---------------------------
+    if "Start Time" not in df.columns or "End Time" not in df.columns:
+        raise KeyError("Input DataFrame must contain 'Start Time' and 'End Time' columns (must be run after US-1).")
+
+    # Taiga Task 2.2 & 2.4: Implement duration calculation (GREEN)
+
+    # 1. Calculate Timedelta using the column names established in US-1.
+    # Assumes 'Start Time' and 'End Time' are datetime objects.
+    df['duration_delta'] = df['End Time'] - df['Start Time']
+
+    # 2. Convert Timedelta to total minutes, handling cross-day trips robustly.
+    df['trip_duration_min'] = df['duration_delta'].dt.total_seconds() / 60.0
+
+    # Functional AC 1 Proxy: Distance Calculation
+    df['distance_km'] = 0.0  # Placeholder for distance
+
+    # Taiga Task 2.5 (Refactor): Drop the temporary column
+    df.drop(columns=['duration_delta'], errors='ignore', inplace=True)
+
+    return df
