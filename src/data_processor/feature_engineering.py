@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import time
+from typing import List, Dict
 
 # ============================================================
 # Rush Hour Constants (AC 4)
@@ -61,19 +62,30 @@ def calculate_trip_metrics(df: pd.DataFrame) -> pd.DataFrame:
     Calculates essential trip metrics: duration in minutes and a distance proxy.
     Fulfills TDD Story US-2.
     """
+    START_TIME_COL = "Start Time"
+    END_TIME_COL = "End Time"
+
     # ---------------------------
-    # Dependency Check
+    # Dependency Check & Resilience (Addressing the format issue)
     # ---------------------------
-    if "Start Time" not in df.columns or "End Time" not in df.columns:
-        raise KeyError("Input DataFrame must contain 'Start Time' and 'End Time' columns (must be run after US-1).")
+    if START_TIME_COL not in df.columns or END_TIME_COL not in df.columns:
+        raise KeyError(f"Input DataFrame must contain '{START_TIME_COL}' and '{END_TIME_COL}' columns.")
 
-    # Taiga Task 2.2 & 2.4: Implement duration calculation (GREEN)
+    # Check and convert to datetime if they are still string objects
+    # Assuming US-1 is done, but adding safety conversion based on user's format:
+    if not pd.api.types.is_datetime64_any_dtype(df[START_TIME_COL]):
+        df[START_TIME_COL] = pd.to_datetime(df[START_TIME_COL], format='%d/%m/%Y %H:%M', errors="coerce")
+    if not pd.api.types.is_datetime64_any_dtype(df[END_TIME_COL]):
+        df[END_TIME_COL] = pd.to_datetime(df[END_TIME_COL], format='%d/%m/%Y %H:%M', errors="coerce")
 
-    # 1. Calculate Timedelta using the column names established in US-1.
-    # Assumes 'Start Time' and 'End Time' are datetime objects.
-    df['duration_delta'] = df['End Time'] - df['Start Time']
+    # ---------------------------
+    # Taiga Task 2.2 & 2.4: Duration calculation
+    # ---------------------------
 
-    # 2. Convert Timedelta to total minutes, handling cross-day trips robustly.
+    # 1. Calculate Timedelta
+    df['duration_delta'] = df[END_TIME_COL] - df[START_TIME_COL]
+
+    # 2. Convert Timedelta to total minutes.
     df['trip_duration_min'] = df['duration_delta'].dt.total_seconds() / 60.0
 
     # Functional AC 1 Proxy: Distance Calculation
