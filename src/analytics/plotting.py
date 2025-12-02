@@ -2,6 +2,7 @@ import plotly.express as px
 import pandas as pd
 
 
+
 def plot_daily_rides(df_daily: pd.DataFrame):
     """
     Produces a Plotly line chart showing total rides per day.
