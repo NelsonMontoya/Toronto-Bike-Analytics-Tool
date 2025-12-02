@@ -26,7 +26,8 @@ def prepare_data(data_source: str) -> pd.DataFrame:
 
     # --- GREEN: Make TDD Test Case 1 Pass (Cleaning) ---
     # Define columns that must be present (ensures data integrity).
-    critical_columns: List[str] = ['Trip Id', 'Trip  Duration', 'Start Station Id', 'Start Time','End Station Id', 'End Time','Start Station Name', 'End Station Name','Bike Id','User Type','Model']
+    critical_columns: List[str] = ['Trip Id', 'Trip  Duration', 'Start Station Id', 'Start Time','End Station Id',
+                                   'End Time','Start Station Name', 'End Station Name','Bike Id','User Type','Model']
     # Fulfills AC 3: Drop rows where critical fields are null.
     df.dropna(subset=critical_columns, inplace=True)
 
