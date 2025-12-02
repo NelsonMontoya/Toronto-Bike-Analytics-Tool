@@ -3,6 +3,9 @@ import streamlit as st
 import os
 from src.data_processor.loading_cleaning import prepare_data
 from src.data_processor.rider_categorization import categorize_riders, filter_by_rider_type
+from src.analytics.usage_patterns import calculate_daily_rides
+from src.analytics.plotting import plot_daily_rides
+from src.data_processor.feature_engineering import label_rush_hour,calculate_trip_metrics
 
 
 # Configuration
@@ -40,6 +43,10 @@ def main():
         # -------------------------------------------
         df_with_rider_type = categorize_riders(cleaned_data)
 
+        ## Calculate columns trip duration and distance US-2
+        label_rush_hour(df_with_rider_type)
+        calculate_trip_metrics(df_with_rider_type)
+
         st.sidebar.header("Filters")
 
         # -------------------------------------------
@@ -67,6 +74,15 @@ def main():
         # -------------------------------------------
         st.write(f"### Showing {len(df_for_charts)} rides for: {rider_choice}")
         st.dataframe(df_for_charts.head(10))
+
+        # -------------------------------------------
+        # Display the figure with all the rides accordingly to type of user
+        # -------------------------------------------
+
+        daily_rides = calculate_daily_rides(df_for_charts)
+        fig = plot_daily_rides(daily_rides)
+        st.plotly_chart(fig, use_container_width=False)
+
 
 
 if __name__ == '__main__':

@@ -32,15 +32,15 @@ def label_rush_hour(df: pd.DataFrame) -> pd.DataFrame:
     # ---------------------------
     # AC 4: Dependency Check
     # ---------------------------
-    if "start_time" not in df.columns:
-        raise KeyError("Input DataFrame must contain a 'start_time' column.")
+    if "Start Time" not in df.columns:
+        raise KeyError("Input DataFrame must contain a 'Start Time' column.")
 
     # Ensure datetime type
-    if not pd.api.types.is_datetime64_any_dtype(df["start_time"]):
-        df["start_time"] = pd.to_datetime(df["start_time"], errors="coerce")
+    if not pd.api.types.is_datetime64_any_dtype(df["Start Time"]):
+        df["Start Time"] = pd.to_datetime(df["Start Time"], errors="coerce")
 
     # Extract time object from datetime
-    start_times = df["start_time"].dt.time
+    start_times = df["Start Time"].dt.time
 
     # ---------------------------
     # AC 3: Rush hour logic
