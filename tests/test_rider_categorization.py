@@ -13,7 +13,7 @@ if PROJECT_ROOT not in sys.path:
 import pandas as pd
 import pytest
 
-from src.rider_categorization import (
+from src.data_processor.rider_categorization import (
     categorize_riders,
     filter_by_rider_type,
 )
