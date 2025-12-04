@@ -3,10 +3,6 @@
 import os
 from datetime import time
 # --- FILE PATHS ---
-# Determine the base directory dynamically
-# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# DATA_DIR = os.path.join(BASE_DIR, '..', '..', 'data')
-# DATA_FILE_PATH = os.path.join(DATA_DIR, 'bike_share_data.csv')
 DATA_FILE_PATH = os.path.join(os.getcwd(), 'data', 'bike_share_data.csv')
 
 # --- DATA SCHEMA (Column Names) ---
