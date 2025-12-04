@@ -1,13 +1,14 @@
 
 import streamlit as st
 import os
-from datetime import time, datetime, timedelta
+import numpy as np
+from datetime import time, timedelta
 from src.data_processor.loading_cleaning import prepare_data
 from src.data_processor.rider_categorization import categorize_riders, filter_by_rider_type
 from src.analytics.usage_patterns import calculate_daily_rides
 from src.analytics.plotting import plot_daily_rides
 from src.data_processor.feature_engineering import label_rush_hour,calculate_trip_metrics
-from src.config import DATA_FILE_PATH,USER_TYPE_COL, DURATION_MIN_COL
+from src.config import DATA_FILE_PATH,USER_TYPE_COL, DURATION_MIN_COL,START_TIME_COL
 from src.data_processor.utils import filter_data_advanced
 
 # Configuration
@@ -96,27 +97,39 @@ def main():
             'Trip Duration Range (minutes)',
             min_value=0,
             max_value=max_duration,
-            value=(10, 60),
+            value=(0, max_duration),
             key='main_duration_filter'
         )
 
-        # Time Slider
-        time_range = st.sidebar.slider(
-            'Time Range (Hours)',
-            min_value=0,
-            max_value=23,
-            value=(7, 19),
-            format="%d:00",
-            key='time_filter_sidebar_primary'
+        st.sidebar.subheader("🕒 Time Range Filter")
+        col1, col2 = st.sidebar.columns(2)
+        # 1. Start Time Input
+        start_time = col1.time_input(
+            'Start Time (HH:mm)',
+            step=timedelta(minutes=1),
+            value=time(7, 0),  # Default to 07:00 AM
+            key='start_time_input'
         )
+
+        # 2. End Time Input
+        end_time = col2.time_input(
+            'End Time (HH:mm)',
+            value=time(19, 0),  # Default to 07:00 PM
+            step=timedelta(minutes=1),
+            key='end_time_input'
+        )
+
         # 3. Apply US-7 Advanced Filter (Crucial Chaining Step)
         if df_for_charts.empty:
             st.warning("No rides match the current filter selection.")
             st.stop()
 
+        # Extract the time component from the full datetime objects returned by the slider
+        time_range_for_filter = (start_time, end_time)
         df_for_charts = filter_data_advanced(
-            df=df_for_charts,  # ✅ Passed the already filtered data
-            start_time_range=(time(time_range[0]), time(time_range[1])),
+            df=df_for_charts,
+            # Pass the tuple of time objects directly
+            start_time_range=time_range_for_filter,
             min_duration=float(duration_range[0]),
             max_duration=float(duration_range[1])
         )
@@ -129,18 +142,22 @@ def main():
         # -------------------------------------------
         # Display
         # -------------------------------------------
-        st.write(f"### Showing {len(df_for_charts)} rides for: {rider_choice}")
-        st.dataframe(df_for_charts.head(10))
+        left_col, right_col = st.columns(2)
+
+        with left_col:
+            st.write(f"### Showing {len(df_for_charts)} rides for: {rider_choice}")
+            st.dataframe(df_for_charts.head(10))
 
         # -------------------------------------------
         # Display the figure with all the rides accordingly to type of user
         # -------------------------------------------
+        with right_col:
+            daily_rides = calculate_daily_rides(df_for_charts)
+            fig = plot_daily_rides(daily_rides)
+            st.plotly_chart(fig, use_container_width=False)
 
-        daily_rides = calculate_daily_rides(df_for_charts)
-        fig = plot_daily_rides(daily_rides)
-        st.plotly_chart(fig, use_container_width=False)
-
-
+        hist_values = np.histogram(df_for_charts[START_TIME_COL].dt.hour, bins=24, range=(0,24))[0]
+        st.bar_chart(hist_values)
 
 if __name__ == '__main__':
     # Ensure the data directory exists before trying to access the file
