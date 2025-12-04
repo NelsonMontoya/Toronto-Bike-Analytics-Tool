@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 from src.analytics.usage_patterns import calculate_daily_rides
+from src.config import START_TIME_COL
 
 
 # ----------------------------------------------------------
@@ -9,7 +10,7 @@ from src.analytics.usage_patterns import calculate_daily_rides
 # ----------------------------------------------------------
 def test_daily_ride_aggregation_counts():
     data = {
-        "Start Time": [
+        START_TIME_COL: [
             *["2024-01-01 08:00:00"] * 10,   # Day 1
             *["2024-01-02 09:00:00"] * 15,   # Day 2
             *["2024-01-03 07:00:00"] * 5,    # Day 3
@@ -17,7 +18,7 @@ def test_daily_ride_aggregation_counts():
     }
 
     df = pd.DataFrame(data)
-    df["Start Time"] = pd.to_datetime(df["Start Time"])
+    df[START_TIME_COL] = pd.to_datetime(df[START_TIME_COL])
 
     result = calculate_daily_rides(df)
 
@@ -31,7 +32,7 @@ def test_daily_ride_aggregation_counts():
 # ----------------------------------------------------------
 def test_daily_rides_index_is_datetime64():
     data = {
-        "Start Time": [
+        START_TIME_COL: [
             "2024-01-01 08:00:00",
             "2024-01-01 09:00:00",
             "2024-01-02 10:00:00",
@@ -39,7 +40,7 @@ def test_daily_rides_index_is_datetime64():
     }
 
     df = pd.DataFrame(data)
-    df["Start Time"] = pd.to_datetime(df["Start Time"])
+    df[START_TIME_COL] = pd.to_datetime(df[START_TIME_COL])
 
     result = calculate_daily_rides(df)
 
@@ -52,7 +53,7 @@ def test_daily_rides_index_is_datetime64():
 # ----------------------------------------------------------
 def test_daily_rides_column_name_and_index_name():
     data = {
-        "Start Time": [
+        START_TIME_COL: [
             "2024-01-01 08:00:00",
             "2024-01-01 09:00:00",
             "2024-01-02 10:00:00",
@@ -60,7 +61,7 @@ def test_daily_rides_column_name_and_index_name():
     }
 
     df = pd.DataFrame(data)
-    df["Start Time"] = pd.to_datetime(df["Start Time"])
+    df[START_TIME_COL] = pd.to_datetime(df[START_TIME_COL])
 
     result = calculate_daily_rides(df)
 

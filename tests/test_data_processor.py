@@ -3,6 +3,7 @@ import pytest
 import datetime
 
 from src.data_processor.utils import filter_data_advanced  # Target function
+from src.config import START_TIME_COL,TRIP_DURATION_COL
 
 
 @pytest.fixture
@@ -12,14 +13,14 @@ def mock_advanced_filter_data():
     Total 5 rows.
     """
     return pd.DataFrame({
-        'Start Time': [
+        START_TIME_COL: [
             datetime.datetime(2025, 1, 1, 7, 30, 0),  # Row 1: Too early (Time out), Duration 10
             datetime.datetime(2025, 1, 1, 9, 0, 0),  # Row 2: Good time, Duration 15 (GOOD)
             datetime.datetime(2025, 1, 1, 9, 30, 0),  # Row 3: Good time, Duration 25 (Duration out)
             datetime.datetime(2025, 1, 1, 10, 30, 0),  # Row 4: Too late (Time out), Duration 15
             datetime.datetime(2025, 1, 1, 9, 0, 0)  # Row 5: Good time, Duration 5 (Duration out)
         ],
-        'Trip  Duration': [10.0, 15.0, 25.0, 15.0, 5.0]
+        TRIP_DURATION_COL: [10.0, 15.0, 25.0, 15.0, 5.0]
     })
 
 

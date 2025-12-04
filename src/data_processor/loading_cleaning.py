@@ -4,7 +4,7 @@
 
 
 import pandas as pd
-from typing import TextIO, List
+from typing import List
 from src.config import (TRIP_ID_COL,TRIP_DURATION_COL,START_TIME_COL, END_TIME_COL,USER_TYPE_COL,START_STATION_COL,
                         END_STATION_COL,START_STATION_ID_COL,END_STATION_ID_COL,BIKE_ID_COL,MODEL_COL)
 

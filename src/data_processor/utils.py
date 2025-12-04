@@ -1,6 +1,6 @@
 # src/data_processor/utils.py
 import pandas as pd
-from typing import Tuple, List
+from typing import Tuple
 from datetime import time
 from src.config import START_TIME_COL,DURATION_MIN_COL
 
