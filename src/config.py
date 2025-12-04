@@ -26,9 +26,9 @@ DISTANCE_KM_COL = 'distance_km'
 
 # --- RUSH HOUR CONSTANTS (Used in US-3 and US-13) ---
 AM_RUSH_START = time(7, 0, 0)   # 7:00 AM
-AM_RUSH_END = time(9, 0, 0)     # 9:00 AM
+AM_RUSH_END = time(8, 59, 59)     # 9:00 AM
 PM_RUSH_START = time(16, 0, 0)  # 4:00 PM
-PM_RUSH_END = time(18, 0, 0)    # 6:00 PM
+PM_RUSH_END = time(17, 59, 59)    # 6:00 PM
 
 # --- DATA CLEANING CONSTANTS ---
 DATETIME_COLS = [START_TIME_COL, END_TIME_COL]

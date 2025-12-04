@@ -1,7 +1,7 @@
 # src/data_processor/utils.py
 import pandas as pd
-from typing import Tuple, List
-from datetime import time
+from typing import Tuple
+from datetime import time, date
 from src.config import START_TIME_COL,DURATION_MIN_COL
 
 
@@ -9,7 +9,9 @@ def filter_data_advanced(
         df: pd.DataFrame,
         start_time_range: Tuple[time, time],
         min_duration: float,
-        max_duration: float
+        max_duration: float,
+        start_date: date,  # <- NEW: Added start_date parameter
+        end_date: date     # <- NEW: Added end_date parameter
 ) -> pd.DataFrame:
     """
     Fulfills US-7 AC: Applies advanced filtering criteria to the DataFrame.
@@ -30,7 +32,14 @@ def filter_data_advanced(
     # 2. DURATION FILTER
     duration_mask = (df[DURATION_MIN_COL] >= min_duration) & (df[DURATION_MIN_COL] <= max_duration)
 
-    # 3. COMBINED MASK (Applies both criteria simultaneously)
-    combined_mask = time_mask & duration_mask
+    # 3. DATE FILTER (NEW LOGIC)
+    # Extract the date component from the full datetime column for comparison
+    start_date_only = df[START_TIME_COL].dt.date
+
+
+    date_mask = (start_date_only >= start_date) & (start_date_only <= end_date)
+
+    # 4. COMBINED MASK (Applies all three criteria simultaneously)
+    combined_mask = time_mask & duration_mask & date_mask  # <- UPDATED TO INCLUDE DATE_MASK
 
     return df[combined_mask].copy()

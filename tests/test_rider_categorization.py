@@ -17,11 +17,12 @@ from src.data_processor.rider_categorization import (
     categorize_riders,
     filter_by_rider_type,
 )
+from src.config import USER_TYPE_COL
 
 
 def test_categorize_riders_maps_annual_and_casual_correctly():
     data = {
-        "User Type": [
+        USER_TYPE_COL: [
             "Annual Member",
             "Casual Member",
             "annual member",
@@ -47,7 +48,7 @@ def test_categorize_riders_maps_annual_and_casual_correctly():
 
 def test_categorize_riders_handles_missing_and_unexpected_values_as_unknown():
     data = {
-        "User Type": [
+        USER_TYPE_COL: [
             None,
             float("nan"),
             "VIP",
@@ -68,7 +69,7 @@ def test_categorize_riders_handles_missing_and_unexpected_values_as_unknown():
 
 def test_filter_by_rider_type_returns_only_annual_members():
     df = pd.DataFrame({
-        "User Type": ["Annual Member", "Casual Member", "Annual Member"],
+        USER_TYPE_COL: ["Annual Member", "Casual Member", "Annual Member"],
     })
     df_with_type = categorize_riders(df)
 
@@ -81,7 +82,7 @@ def test_filter_by_rider_type_returns_only_annual_members():
 
 def test_filter_by_rider_type_returns_only_casual_members():
     df = pd.DataFrame({
-        "User Type": ["Casual Member", "Annual Member", "Casual Member"],
+        USER_TYPE_COL: ["Casual Member", "Annual Member", "Casual Member"],
     })
     df_with_type = categorize_riders(df)
 
@@ -94,7 +95,7 @@ def test_filter_by_rider_type_returns_only_casual_members():
 
 def test_filter_by_rider_type_raises_error_for_invalid_input():
     df = pd.DataFrame({
-        "User Type": ["Casual Member", "Annual Member"],
+        USER_TYPE_COL: ["Casual Member", "Annual Member"],
     })
     df_with_type = categorize_riders(df)
 
@@ -104,7 +105,7 @@ def test_filter_by_rider_type_raises_error_for_invalid_input():
 
 def test_filter_by_rider_type_raises_if_rider_type_column_missing():
     df = pd.DataFrame({
-        "User Type": ["Casual Member", "Annual Member"],
+        USER_TYPE_COL: ["Casual Member", "Annual Member"],
     })
     with pytest.raises(KeyError):
         filter_by_rider_type(df, "Casual")

@@ -2,7 +2,7 @@
 
 from typing import Optional
 import pandas as pd
-
+from src.config import USER_TYPE_COL
 
 def _map_user_type_to_rider_type(raw_value: Optional[object]) -> str:
     """
@@ -28,7 +28,7 @@ def _map_user_type_to_rider_type(raw_value: Optional[object]) -> str:
 
 def categorize_riders(
     df: pd.DataFrame,
-    user_type_col: str = "User Type",
+    user_type_col: str = USER_TYPE_COL,
     new_col: str = "rider_type"
 ) -> pd.DataFrame:
     """

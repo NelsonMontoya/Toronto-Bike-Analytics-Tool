@@ -1,89 +1,61 @@
 import pandas as pd
-from datetime import time
-from typing import List, Dict
-from src.config import AM_RUSH_START,AM_RUSH_END,PM_RUSH_START,PM_RUSH_END,START_TIME_COL,END_TIME_COL,TRIP_DURATION_COL
+from datetime import time, timedelta
+
+# Import constants (assuming they are defined in src.config and src.data_processor.feature_engineering)
+# Note: You must ensure all these constants are correctly defined and imported in your environment
+from src.config import (
+    START_TIME_COL, END_TIME_COL, IS_RUSH_HOUR_COL,
+    DURATION_MIN_COL, TRIP_DURATION_COL, AM_RUSH_START,AM_RUSH_END,PM_RUSH_START,PM_RUSH_END
+)
 
 
-# ============================================================
-# Core Logic Function (AC 1)
-# ============================================================
 def label_rush_hour(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Adds a Boolean column `is_rush_hour` to the DataFrame based on
-    the trip start_time.
-
-    Rush hour windows:
-    - AM: 07:00:00 to 08:59:59
-    - PM: 16:00:00 to 17:59:59
-
-    AC Requirements:
-    - Must raise an exception if start_time not present (AC 4)
-    - Must add boolean is_rush_hour column (AC 2)
+    Adds a boolean column indicating if a trip started during rush hour.
+    Rush hours are 6:00 to 9:59 (AM) and 16:00 to 18:59 (PM).
     """
-
-    # ---------------------------
-    # AC 4: Dependency Check
-    # ---------------------------
     if START_TIME_COL not in df.columns:
-        raise KeyError("Input DataFrame must contain a 'Start Time' column.")
+        raise KeyError(f"DataFrame must contain '{START_TIME_COL}' column.")
 
-    # Ensure datetime type
-    if not pd.api.types.is_datetime64_any_dtype(df[START_TIME_COL]):
-        df[START_TIME_COL] = pd.to_datetime(df[START_TIME_COL], errors="coerce")
+    # Extract time component from datetime objects
+    trip_time = df[START_TIME_COL].dt.time
 
-    # Extract time object from datetime
-    start_times = df[START_TIME_COL].dt.time
+    # AM Rush Hour:
+    is_am_rush = (trip_time >= AM_RUSH_START) & (trip_time < AM_RUSH_END)
 
-    # ---------------------------
-    # AC 3: Rush hour logic
-    # Vectorized conditions for performance (AC 1)
-    # ---------------------------
-    is_am_rush = (start_times >= AM_RUSH_START) & (start_times <= AM_RUSH_END)
-    is_pm_rush = (start_times >= PM_RUSH_START) & (start_times <= PM_RUSH_END)
+    # PM Rush Hour:
+    is_pm_rush = (trip_time >= PM_RUSH_START) & (trip_time < PM_RUSH_END)
 
-    df["is_rush_hour"] = is_am_rush | is_pm_rush
-
+    df[IS_RUSH_HOUR_COL] = is_am_rush | is_pm_rush
     return df
 
 
-# ============================================================
-# Core Logic Function (US-2)
-# ============================================================
 def calculate_trip_metrics(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Calculates essential trip metrics: duration in minutes and a distance proxy.
-    Fulfills TDD Story US-2.
+    Calculates trip duration in minutes and adds a placeholder for distance (km).
     """
+    # Check for required columns
+    required_cols = [START_TIME_COL, END_TIME_COL]
+    for col in required_cols:
+        if col not in df.columns:
+            raise KeyError(f"DataFrame must contain '{col}' column.")
 
-    # ---------------------------
-    # Dependency Check & Resilience (Addressing the format issue)
-    # ---------------------------
-    if START_TIME_COL not in df.columns or END_TIME_COL not in df.columns:
-        raise KeyError(f"Input DataFrame must contain '{START_TIME_COL}' and '{END_TIME_COL}' columns.")
+    # 1. Calculate time difference (timedelta)
+    # Temporary column to hold the timedelta object
+    df['duration_delta'] = df[END_TIME_COL] - df[START_TIME_COL]
 
-    # Check and convert to datetime if they are still string objects
-    # Assuming US-1 is done, but adding safety conversion based on user's format:
-    if not pd.api.types.is_datetime64_any_dtype(df[START_TIME_COL]):
-        df[START_TIME_COL] = pd.to_datetime(df[START_TIME_COL], format='%d/%m/%Y %H:%M', errors="coerce")
-    if not pd.api.types.is_datetime64_any_dtype(df[END_TIME_COL]):
-        df[END_TIME_COL] = pd.to_datetime(df[END_TIME_COL], format='%d/%m/%Y %H:%M', errors="coerce")
+    # 2. Convert timedelta to total seconds and assign to the intermediate column
+    # The tests indicate TRIP_DURATION_COL is the column name for duration in seconds
+    df[TRIP_DURATION_COL] = df['duration_delta'].dt.total_seconds()
 
-    # ---------------------------
-    # Taiga Task 2.2 & 2.4: Duration calculation
-    # ---------------------------
+    # 3. Calculate trip duration in minutes
+    # This is the line that was failing before, as TRIP_DURATION_COL did not exist.
+    df[DURATION_MIN_COL] = df[TRIP_DURATION_COL] / 60.0
 
-    # 1. Calculate Timedelta
-    # df['duration_delta'] = df[END_TIME_COL] - df[START_TIME_COL]
+    # 4. Add placeholder for distance_km
+    df['distance_km'] = 0.0
 
-    # 2. Convert Timedelta to total minutes.
-    # df['trip_duration_min'] = df['duration_delta'].dt.total_seconds() / 60.0
-    df['trip_duration_min'] = df[TRIP_DURATION_COL] / 60.0
-
-
-    # Functional AC 1 Proxy: Distance Calculation
-    # df['distance_km'] = 0.0  # Placeholder for distance
-
-    # Taiga Task 2.5 (Refactor): Drop the temporary column
-    # df.drop(columns=['duration_delta'], errors='ignore', inplace=True)
+    # 5. Drop temporary columns
+    df.drop(columns=['duration_delta', TRIP_DURATION_COL], inplace=True)
 
     return df
