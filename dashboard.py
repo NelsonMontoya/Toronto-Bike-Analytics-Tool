@@ -8,7 +8,7 @@ from src.data_processor.rider_categorization import categorize_riders, filter_by
 from src.analytics.usage_patterns import calculate_daily_rides
 from src.analytics.plotting import plot_daily_rides
 from src.data_processor.feature_engineering import label_rush_hour,calculate_trip_metrics
-from src.config import DATA_FILE_PATH,USER_TYPE_COL, DURATION_MIN_COL,START_TIME_COL
+from src.config import DATA_FILE_PATH,USER_TYPE_COL, DURATION_MIN_COL,START_TIME_COL,IS_RUSH_HOUR_COL
 from src.data_processor.utils import filter_data_advanced
 
 # Configuration
@@ -70,7 +70,7 @@ def main():
         if rider_choice != "All":
             df_for_charts = filter_by_rider_type(df_for_charts, rider_choice)
 
-        rush_options = sorted(df_for_charts["is_rush_hour"].unique())
+        rush_options = sorted(df_for_charts[IS_RUSH_HOUR_COL].unique())
         # Convert bool to string for presentation
         rush_options = [str(x) for x in rush_options]
         rush_options.insert(0, "All")
@@ -84,7 +84,7 @@ def main():
 
         if rush_hour_choice != "All":
             target_bool = True if rush_hour_choice == 'True' else False
-            df_for_charts = df_for_charts[df_for_charts["is_rush_hour"] == target_bool]
+            df_for_charts = df_for_charts[df_for_charts[IS_RUSH_HOUR_COL] == target_bool]
 
         # -------------------------------------------
         # 2. US-7: Advanced Filtering UI
@@ -136,14 +136,14 @@ def main():
         start_time = col1.time_input(
             'Start Time (HH:mm)',
             step=timedelta(minutes=1),
-            value=time(7, 0),  # Default to 07:00 AM
+            value=time(0, 0),  # Default to 00:00
             key='start_time_input'
         )
 
         # 2. End Time Input
         end_time = col2.time_input(
             'End Time (HH:mm)',
-            value=time(19, 0),  # Default to 07:00 PM
+            value=time(23, 59),  # Default to 23:59
             step=timedelta(minutes=1),
             key='end_time_input'
         )

@@ -36,6 +36,7 @@ def filter_data_advanced(
     # Extract the date component from the full datetime column for comparison
     start_date_only = df[START_TIME_COL].dt.date
 
+
     date_mask = (start_date_only >= start_date) & (start_date_only <= end_date)
 
     # 4. COMBINED MASK (Applies all three criteria simultaneously)
