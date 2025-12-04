@@ -2,7 +2,7 @@
 import streamlit as st
 import os
 import numpy as np
-from datetime import time, timedelta
+from datetime import time, timedelta,date
 from src.data_processor.loading_cleaning import prepare_data
 from src.data_processor.rider_categorization import categorize_riders, filter_by_rider_type
 from src.analytics.usage_patterns import calculate_daily_rides
@@ -101,6 +101,35 @@ def main():
             key='main_duration_filter'
         )
 
+        # 1. Find the absolute min and max date in the data
+        min_data_date = df_for_charts[START_TIME_COL].min().date()  # Extracts the earliest date
+        max_data_date = df_for_charts[START_TIME_COL].max().date()  # Extracts the latest date
+
+        st.sidebar.subheader("📅 Date Range Filter")
+
+        # Create two columns within the sidebar for the date inputs
+        date_col1, date_col2 = st.sidebar.columns(2)
+
+        # 1. Start Date Input
+        start_date = date_col1.date_input(
+            'Start Date',
+            value=min_data_date,  # Default selection is the earliest date in the data
+            min_value=min_data_date,  # Restrict selection to the earliest date
+            max_value=max_data_date,  # Restrict selection up to the latest date
+            key='start_date_input'
+        )
+
+        # 2. End Date Input
+        end_date = date_col2.date_input(
+            'End Date',
+            value=max_data_date,  # Default selection is the latest date in the data
+            min_value=min_data_date,  # Restrict selection down to the earliest date
+            max_value=max_data_date,  # Restrict selection up to the latest date
+            key='end_date_input'
+        )
+        # Combine the outputs into a tuple for filtering
+        date_range_for_filter = (start_date, end_date)
+
         st.sidebar.subheader("🕒 Time Range Filter")
         col1, col2 = st.sidebar.columns(2)
         # 1. Start Time Input
@@ -131,8 +160,12 @@ def main():
             # Pass the tuple of time objects directly
             start_time_range=time_range_for_filter,
             min_duration=float(duration_range[0]),
-            max_duration=float(duration_range[1])
+            max_duration=float(duration_range[1]),
+            start_date=date_range_for_filter[0],  # Pass start date
+            end_date=date_range_for_filter[1]  # Pass end date
         )
+
+
 
         # FINAL CHECK
         if df_for_charts.empty:
