@@ -45,12 +45,12 @@ Execute the main dashboard script:
 
 ```bash
 streamlit run dashboard.py
-
+ ```
 ### 4. Data Source
 
 Always acknowledge where the data comes from.
 
-```markdown
+
 ## 📊 Data Source
 
 This tool utilizes publicly available data from the **Toronto Bike Share** system, typically sourced from their Open Data portal 
