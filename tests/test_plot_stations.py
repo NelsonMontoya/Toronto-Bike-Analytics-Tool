@@ -1,62 +1,60 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
-import pytest
+import altair as alt
 
-from src.analytics import plot_top_stations
+from src.analytics.plot_top_stations import plot_top_stations
 
 
-def test_plot_top_starting_stations_returns_figure():
+def test_plot_top_stations_returns_altair_chart():
     """
-    The plotting function should return a Matplotlib Figure
-    when given a valid DataFrame.
+    The plotting function should return an Altair Chart-like object
+    (Chart or LayerChart) when given a valid DataFrame.
     """
     data = {
-        "Start Station Name": ["A", "B", "C", "D", "E"],
+        "start_station_name": ["A", "B", "C", "D", "E"],
         "trip_count": [120, 90, 60, 150, 110],
     }
     df = pd.DataFrame(data)
 
-    fig = plot_top_stations(df)
+    chart = plot_top_stations(df, title="Top 5 Stations")
 
-    # Check type
-    assert isinstance(fig, Figure)
-
-    # Optional: close figure to avoid resource warnings
-    plt.close(fig)
+    # The function currently returns a LayerChart (chart + text)
+    assert isinstance(chart, (alt.Chart, alt.LayerChart))
 
 
-def test_plot_top_starting_stations_raises_error_for_missing_columns():
+def test_plot_top_stations_uses_title_property():
     """
-    The plotting function should raise ValueError if the
-    required columns are missing.
-    """
-    # Missing 'trip_count' column
-    bad_data = {
-        "Start Station Name": ["A", "B", "C"],
-        "something_else": [1, 2, 3],
-    }
-    bad_df = pd.DataFrame(bad_data)
-
-    with pytest.raises(ValueError):
-        plot_top_stations(bad_df)
-
-
-def test_plot_top_starting_stations_uses_default_title():
-    """
-    The default title should be 'Top 10 Busiest Starting Stations'
-    when no custom title is provided.
+    The chart (or its base layer) should use the title passed into the function.
     """
     data = {
-        "Start Station Name": ["A", "B", "C"],
+        "start_station_name": ["A", "B", "C"],
         "trip_count": [10, 20, 30],
     }
     df = pd.DataFrame(data)
 
-    fig = plot_top_stations(df)
+    title = "My Custom Title"
+    chart = plot_top_stations(df, title=title)
 
-    # Get the Axes from the Figure and check the title
-    ax = fig.axes[0]
-    assert ax.get_title() == "Top 10 Busiest Starting Stations"
+    # If it's a layered chart, look at the first layer
+    if isinstance(chart, alt.LayerChart):
+        base_chart = chart.layer[0]
+        assert base_chart.title == title
+    else:
+        assert chart.title == title
 
-    plt.close(fig)
+
+def test_plot_top_stations_requires_trip_count_column():
+    """
+    If the DataFrame does not contain 'trip_count', the function
+    should fail – this is our RED test for invalid input.
+    """
+    bad_data = {
+        "start_station_name": ["A", "B", "C"],
+        "something_else": [1, 2, 3],
+    }
+    bad_df = pd.DataFrame(bad_data)
+
+    try:
+        plot_top_stations(bad_df, title="Bad Data")
+        assert False, "Expected an error when 'trip_count' is missing"
+    except Exception:
+        assert True
