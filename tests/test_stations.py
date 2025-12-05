@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 from src.analytics.stations import get_top_starting_stations 
+from src.config import START_STATION_COL
 
 # --- Fixture for common test data ---
 
@@ -8,7 +9,7 @@ from src.analytics.stations import get_top_starting_stations
 def sample_data():
     """Provides a sample DataFrame for testing."""
     data = {
-        "Start Station Name": [
+        START_STATION_COL: [
             "Station A",
             "Station B",
             "Station A",
@@ -36,17 +37,17 @@ def test_default_top_n_standard_case(sample_data):
     result_df = get_top_starting_stations(sample_data)
 
     # Check for correct columns and number of rows (top_n=10, but only 6 unique non-empty stations + 1 Unknown)
-    assert list(result_df.columns) == ["Start Station Name", "trip_count"]
+    assert list(result_df.columns) == [START_STATION_COL, "trip_count"]
     assert len(result_df) == 6 # A, B, C, D, E, Unknown (since top_n > 6, it returns all)
 
     # Check the top station and count
-    assert result_df.iloc[0]["Start Station Name"] == "Station A"
+    assert result_df.iloc[0][START_STATION_COL] == "Station A"
     assert result_df.iloc[0]["trip_count"] == 5
 
     # Check the second station and count (B and C are tied at 3, so order depends on pandas sort stability)
     # The important part is that the top stations and counts are correct somewhere in the result
-    assert {"Station B", "Station C"}.issubset(result_df["Start Station Name"].values)
-    assert all(result_df[result_df["Start Station Name"].isin(["Station B", "Station C"])]["trip_count"] == 3)
+    assert {"Station B", "Station C"}.issubset(result_df[START_STATION_COL].values)
+    assert all(result_df[result_df[START_STATION_COL].isin(["Station B", "Station C"])]["trip_count"] == 3)
 
 
 def test_missing_values_are_handled(sample_data):
@@ -54,7 +55,7 @@ def test_missing_values_are_handled(sample_data):
     result_df = get_top_starting_stations(sample_data, top_n=10)
 
     # Check if 'Unknown' station exists and has the correct count (1 in the sample data)
-    unknown_row = result_df[result_df["Start Station Name"] == "Unknown"]
+    unknown_row = result_df[result_df[START_STATION_COL] == "Unknown"]
 
     assert not unknown_row.empty
     assert unknown_row.iloc[0]["trip_count"] == 1
@@ -78,7 +79,7 @@ def test_custom_top_n(sample_data):
     }
 
     # Verify that the top N names and counts match the expected
-    actual_names_counts = dict(zip(result_df["Start Station Name"], result_df["trip_count"]))
+    actual_names_counts = dict(zip(result_df[START_STATION_COL], result_df["trip_count"]))
     
     assert set(actual_names_counts.keys()).issubset(set(expected_counts.keys()))
     assert all(actual_names_counts.get(k) == v for k, v in expected_counts.items() if k in actual_names_counts)
@@ -86,10 +87,10 @@ def test_custom_top_n(sample_data):
 
 def test_empty_dataframe():
     """Test function behavior with an empty input DataFrame."""
-    empty_df = pd.DataFrame({"Start Station Name": [], "Some Other Column": []})
+    empty_df = pd.DataFrame({START_STATION_COL: [], "Some Other Column": []})
     
     result_df = get_top_starting_stations(empty_df)
 
     # The result should be an empty DataFrame with the correct columns
-    assert list(result_df.columns) == ["Start Station Name", "trip_count"]
+    assert list(result_df.columns) == [START_STATION_COL, "trip_count"]
     assert result_df.empty
