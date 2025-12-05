@@ -19,9 +19,9 @@ def plot_top_stations(top_stations_df: pd.DataFrame, title: str) -> alt.Chart:
     # 1. Create the base bar chart
     chart = alt.Chart(top_stations_df).mark_bar().encode(
         # Y-axis: Station Name. Sort by '-x' (trip_count) descending.
-        y=alt.Y(station_col_name, title="Start Station", sort="-x"),
+        x=alt.X(station_col_name, title="Start Station", sort="-x"),
         # X-axis: Trip Count.
-        x=alt.X("trip_count", title="Trip Count"),
+        y=alt.Y("trip_count", title="Trip Count"),
         tooltip=[station_col_name, "trip_count"]
     ).properties(
         title=title
