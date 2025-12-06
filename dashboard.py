@@ -12,6 +12,7 @@ from src.config import DATA_FILE_PATH,USER_TYPE_COL, DURATION_MIN_COL,START_TIME
 from src.data_processor.utils import filter_data_advanced
 from src.analytics.plot_top_stations import plot_top_stations
 from src.analytics.stations import get_top_starting_stations
+from src.analytics.plotting import plot_daily_rides, plot_duration_histogram
 import altair as alt
 
 # Configuration
@@ -191,6 +192,19 @@ def main():
             daily_rides = calculate_daily_rides(df_for_charts)
             fig = plot_daily_rides(daily_rides)
             st.plotly_chart(fig, use_container_width=False)
+
+            # -------------------------------------------
+            # Task 8.3: US-8 Chart Integration
+            # -------------------------------------------
+            st.markdown("---")
+            st.subheader("Trip Duration Comparison by Rider Type (US-8)")
+
+            # 1. Call the new plotting function
+            duration_fig = plot_duration_histogram(df_for_charts)
+
+            # 2. Display the Plotly figure
+            st.plotly_chart(duration_fig, use_container_width=False)
+
 
         hist_values = np.histogram(df_for_charts[START_TIME_COL].dt.hour, bins=24, range=(0,24))[0]
         st.bar_chart(hist_values)
