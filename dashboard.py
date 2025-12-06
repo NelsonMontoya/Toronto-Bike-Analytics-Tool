@@ -8,7 +8,7 @@ from src.data_processor.rider_categorization import categorize_riders, filter_by
 from src.analytics.usage_patterns import calculate_daily_rides
 from src.analytics.plotting import plot_daily_rides
 from src.data_processor.feature_engineering import label_rush_hour,calculate_trip_metrics
-from src.config import DATA_FILE_PATH,USER_TYPE_COL, DURATION_MIN_COL,START_TIME_COL,IS_RUSH_HOUR_COL
+from src.config import URL,DATA_FILE_PATH,USER_TYPE_COL, DURATION_MIN_COL,START_TIME_COL,IS_RUSH_HOUR_COL
 from src.data_processor.utils import filter_data_advanced
 from src.analytics.plot_top_stations import plot_top_stations
 from src.analytics.stations import get_top_starting_stations
@@ -33,7 +33,7 @@ def main():
     # --- Load Data Pipeline ---
     try:
         # Calls the successfully tested function from US-1
-        cleaned_data = prepare_data(DATA_FILE_PATH)
+        cleaned_data = prepare_data(URL)
         # st.success("✅ Data successfully loaded and cleaned!")
     except Exception as e:
         st.error(f"❌ ERROR during data processing: {e}")
