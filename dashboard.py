@@ -10,6 +10,9 @@ from src.analytics.plotting import plot_daily_rides
 from src.data_processor.feature_engineering import label_rush_hour,calculate_trip_metrics
 from src.config import DATA_FILE_PATH,USER_TYPE_COL, DURATION_MIN_COL,START_TIME_COL,IS_RUSH_HOUR_COL
 from src.data_processor.utils import filter_data_advanced
+from src.analytics.plot_top_stations import plot_top_stations
+from src.analytics.stations import get_top_starting_stations
+import altair as alt
 
 # Configuration
 # Set up the page configuration
@@ -191,6 +194,38 @@ def main():
 
         hist_values = np.histogram(df_for_charts[START_TIME_COL].dt.hour, bins=24, range=(0,24))[0]
         st.bar_chart(hist_values)
+
+        
+        # -------------------------------------------
+        # NEW SECTION: Top Starting Stations Analysis
+        # -------------------------------------------
+        st.markdown("---")
+        st.header("📍 Top Starting Stations")
+
+        # 1. User input for Top N
+        top_n_stations = st.slider(
+            "Select the number of top stations to analyze:", 
+            min_value=3, 
+            max_value=20, 
+            value=10
+        )
+        
+        # 2. Get the top stations data (DataFrame)
+        top_stations_df = get_top_starting_stations(df_for_charts, top_n=top_n_stations)
+
+        # 3. Generate the Altair Chart object (Figure)
+        station_chart = plot_top_stations(
+            top_stations_df, 
+            title=f"Top {top_n_stations} Busiest Starting Stations"
+        )
+        
+        # 4. Display the chart using st.altair_chart
+        st.altair_chart(station_chart, use_container_width=True)
+
+        st.subheader("Top Stations Data")
+        st.dataframe(top_stations_df)
+
+        
 
 if __name__ == '__main__':
     # Ensure the data directory exists before trying to access the file
