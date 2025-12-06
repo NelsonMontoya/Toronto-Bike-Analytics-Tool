@@ -1,7 +1,7 @@
 import pandas as pd
 import altair as alt
 
-from src.analytics.plot_top_stations import plot_top_stations
+from src.analytics.plotting import plot_top_stations
 
 
 def test_plot_top_stations_returns_altair_chart():
