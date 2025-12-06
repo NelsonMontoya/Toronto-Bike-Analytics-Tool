@@ -3,7 +3,9 @@
 import os
 from datetime import time
 # --- FILE PATHS ---
-DATA_FILE_PATH = os.path.join(os.getcwd(), 'data', 'bike_share_data.csv')
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_FILE_PATH = os.path.join(PROJECT_ROOT, 'data', 'bike_share_data.csv')
+URL = "https://github.com/NelsonMontoya/Toronto-Bike-Analytics-Tool/releases/download/v1.0/Bike.share.ridership.2024-08.csv"
 
 # --- DATA SCHEMA (Column Names) ---
 TRIP_ID_COL = 'Trip Id'

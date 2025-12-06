@@ -23,7 +23,7 @@ def prepare_data(data_source: str) -> pd.DataFrame:
 
     # --- GREEN: Make TDD Test Case 2 Pass (Datetime Conversion) ---
     # Fulfills AC 2: Converts string columns to datetime objects.
-    df[ START_TIME_COL] = pd.to_datetime(df[START_TIME_COL])
+    df[START_TIME_COL] = pd.to_datetime(df[START_TIME_COL])
     df[END_TIME_COL] = pd.to_datetime(df[END_TIME_COL])
 
     # --- GREEN: Make TDD Test Case 1 Pass (Cleaning) ---
