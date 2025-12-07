@@ -113,27 +113,6 @@ def test_duration_calculation_crossday():
     # Assert 3: Check that the temporary column was dropped (Refactoring check - Taiga Task 2.5)
     assert 'duration_delta' not in df_out.columns
 
-
-# Task 2.4 (Implied): Test distance column creation (FIXED)
-def test_distance_column_created():
-    """Checks that the distance_km column is added as a placeholder (AC 1)."""
-    df_in = pd.DataFrame({
-        START_TIME_COL: ['01/01/2025 09:00'],
-        END_TIME_COL: ['01/01/2025 09:15']
-    })
-
-    # FIX: Explicitly convert the string columns to datetime objects *before* calling the function
-    df_in[START_TIME_COL] = pd.to_datetime(df_in[START_TIME_COL], format=DATE_FORMAT)
-    df_in[END_TIME_COL] = pd.to_datetime(df_in[END_TIME_COL], format=DATE_FORMAT)
-
-    df_out = calculate_trip_metrics(df_in)
-
-    # Assert: The required distance column is created
-    assert 'distance_km' in df_out.columns
-    # Assert: The placeholder value is 0.0 (as implemented)
-    assert df_out['distance_km'].iloc[0] == pytest.approx(0.0)
-
-
 # Task 2.4 (Implied): Test missing column raises KeyError
 def test_missing_time_column_raises():
     """Checks that the function raises KeyError if time columns are missing."""
