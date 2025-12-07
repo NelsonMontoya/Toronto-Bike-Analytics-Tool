@@ -92,6 +92,40 @@ div[data-testid="column"] > div {
 """
 st.markdown(KPI_CARD_CSS, unsafe_allow_html=True)
 
+# ---------------------------------------------------
+# GLOBAL DARK BACKGROUND
+# ---------------------------------------------------
+DARK_BG = """
+<style>
+/* Main app background */
+.stApp {
+    background-color: #000000 !important;
+}
+
+/* Text color default */
+html, body, [class*="css"]  {
+    color: #FFFFFF !important;
+}
+
+/* Remove white blocks */
+.block-container {
+    background-color: #000000 !important;
+}
+
+/* Fix dataframe background */
+[data-testid="stDataFrame"] div {
+    background-color: #000 !important;
+    color: #FFF !important;
+}
+
+/* Fix code blocks if used */
+.stCodeBlock {
+    background-color: #111 !important;
+    color: white !important;
+}
+</style>
+"""
+st.markdown(DARK_BG, unsafe_allow_html=True)
 
 # ---------------------------------------------------
 # STREAMLIT CONFIG
