@@ -1,248 +1,293 @@
-
 import streamlit as st
 import os
-import numpy as np
-from datetime import time, timedelta,date
+from datetime import time, date
+
 from src.data_processor.loading_cleaning import prepare_data
 from src.data_processor.rider_categorization import categorize_riders, filter_by_rider_type
-from src.analytics.usage_patterns import calculate_daily_rides
-from src.analytics.plotting import plot_daily_rides
-from src.data_processor.feature_engineering import label_rush_hour,calculate_trip_metrics
-from src.config import DATA_FILE_PATH,USER_TYPE_COL, DURATION_MIN_COL,START_TIME_COL,IS_RUSH_HOUR_COL
+from src.data_processor.feature_engineering import label_rush_hour, calculate_trip_metrics
 from src.data_processor.utils import filter_data_advanced
-from src.analytics.plot_top_stations import plot_top_stations
-from src.analytics.stations import get_top_starting_stations
-from src.analytics.plotting import plot_daily_rides, plot_duration_histogram
-import altair as alt
 
-# Configuration
-# Set up the page configuration
+from src.analytics.usage_patterns import calculate_daily_rides
+from src.analytics.plotting import plot_daily_rides, plot_duration_histogram
+from src.analytics.stations import get_top_starting_stations
+from src.analytics.plot_top_stations import plot_top_stations
+
+from src.config import URL, USER_TYPE_COL, DURATION_MIN_COL, START_TIME_COL, IS_RUSH_HOUR_COL
+
+
+# ---------------------------------------------------
+# CUSTOM CSS – MODERN LONG TABS
+# ---------------------------------------------------
+TABS_STYLE = """
+<style>
+div[data-baseweb="tab-list"] {
+    display: flex;
+    justify-content: space-evenly;
+    gap: 2rem;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #444;
+}
+
+button[data-baseweb="tab"] {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    padding: 14px 40px !important;
+    border-radius: 10px !important;
+    background-color: #222 !important;
+    border: 1px solid #555 !important;
+    color: #ccc !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+button[data-baseweb="tab"]:hover {
+    background-color: #333 !important;
+}
+
+button[data-baseweb="tab"][aria-selected="true"] {
+    background-color: #0D6EFD !important;
+    color: white !important;
+    border-color: #0B5ED7 !important;
+    box-shadow: 0px 2px 10px rgba(13,110,253,0.35) !important;
+}
+</style>
+"""
+st.markdown(TABS_STYLE, unsafe_allow_html=True)
+
+# ---------------------------------------------------
+# KPI CARDS – GOLD & DARK THEME
+# ---------------------------------------------------
+KPI_CARD_CSS = """
+<style>
+div[data-testid="column"] > div {
+    display: flex;
+    justify-content: center;
+}
+
+/* KPI CARD */
+.kpi-card {
+    background-color: #111 !important;
+    border: 2px solid #D4AF37 !important;
+    border-radius: 14px !important;
+    padding: 20px 25px !important;
+    width: 90% !important;
+    text-align: center !important;
+    box-shadow: 0px 0px 15px rgba(212,175,55,0.35);
+}
+
+/* Title */
+.kpi-card-title {
+    color: #D4AF37 !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    margin-bottom: 5px !important;
+}
+
+/* Value */
+.kpi-card-value {
+    color: white !important;
+    font-size: 26px !important;
+    font-weight: 700 !important;
+}
+</style>
+"""
+st.markdown(KPI_CARD_CSS, unsafe_allow_html=True)
+
+
+# ---------------------------------------------------
+# STREAMLIT CONFIG
+# ---------------------------------------------------
 st.set_page_config(
-    layout="wide",
     page_title="Toronto Bike-Sharing Analytics",
-    menu_items={'About': 'Basic data loading tool for Toronto Bike Share data.'}
+    layout="wide"
 )
 
+
+# ---------------------------------------------------
+# MAIN FUNCTION
+# ---------------------------------------------------
 def main():
-    # --- UI Setup ---
-    st.title("🚴 Toronto Bike-Sharing Analytics Tool")
+
+    # --------------------------
+    # TITLE
+    # --------------------------
+    st.title("Toronto Bike-Sharing Analytics Dashboard")
+    st.markdown("Interactive analytics for Toronto Bike Share ridership.")
     st.markdown("---")
-    # st.header("Stage 1: Data Preparation Status (US-1 Complete)")
 
+    # --------------------------
+    # DATA PIPELINE
+    # --------------------------
+    raw = prepare_data(URL)
+    df = categorize_riders(raw)
+    df = label_rush_hour(df)
+    df = calculate_trip_metrics(df)
 
-    # --- Load Data Pipeline ---
-    try:
-        # Calls the successfully tested function from US-1
-        cleaned_data = prepare_data(DATA_FILE_PATH)
-        # st.success("✅ Data successfully loaded and cleaned!")
-    except Exception as e:
-        st.error(f"❌ ERROR during data processing: {e}")
-        st.error(f"Error: Data file not found at {DATA_FILE_PATH}. Please check the path and file name.")
-        st.stop()
+    # --------------------------
+    # TABS IN FINAL ORDER
+    # --------------------------
+    tab_timeline, tab_duration, tab_stations, tab_data = st.tabs(
+        ["Timeline & KPIs", "Duration Analytics", "Stations Analytics", "Data Tables"]
+    )
 
-    # --- Display Basic Metrics ---
+    # ============================================================
+    # TAB 1 — TIMELINE + KPI CARDS
+    # ============================================================
+    with tab_timeline:
 
-    if cleaned_data is not None:
-        # -------------------------------------------
-        # Categorize riders
-        # -------------------------------------------
-        df_with_rider_type = categorize_riders(cleaned_data)
+        st.subheader("Key Performance Indicators")
 
-        ## Calculate columns trip duration and distance US-2
-        df_with_rider_type = label_rush_hour(df_with_rider_type)
-        df_with_rider_type = calculate_trip_metrics(df_with_rider_type)
+        total_rides = f"{len(df):,}"
+        avg_duration = df[DURATION_MIN_COL].mean()
+        subscriber_rate = (df["rider_type"] == "Annual member").mean() * 100
 
-        st.sidebar.header("Filters")
+        c1, c2, c3 = st.columns(3)
 
-        # -------------------------------------------
-        # Rider Type Selectbox (Dynamic)
-        # -------------------------------------------
-        all_rider_types = sorted(df_with_rider_type[USER_TYPE_COL].unique())
-        options = ["All"] + all_rider_types
+        with c1:
+            st.markdown(
+                f"""
+                <div class="kpi-card">
+                    <div class="kpi-card-title">Total Rides</div>
+                    <div class="kpi-card-value">{total_rides}</div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
-        rider_choice = st.sidebar.selectbox(
-            "Select Rider Type:",
-            options=options,
-            index=0
-        )
+        with c2:
+            st.markdown(
+                f"""
+                <div class="kpi-card">
+                    <div class="kpi-card-title">Avg Trip Duration (min)</div>
+                    <div class="kpi-card-value">{avg_duration:.1f}</div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
-        # -------------------------------------------
-        # START OF FILTER CHAINING
-        # -------------------------------------------
-        df_for_charts = df_with_rider_type.copy()
+        with c3:
+            st.markdown(
+                f"""
+                <div class="kpi-card">
+                    <div class="kpi-card-title">Subscriber Share</div>
+                    <div class="kpi-card-value">{subscriber_rate:.1f}%</div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        st.markdown("---")
+        st.subheader("Daily Ridership Timeline")
+
+        df_timeline = df.copy()
+
+        rider_types = ["All"] + sorted(df[USER_TYPE_COL].unique())
+        rider_choice = st.selectbox("Filter by Rider Type:", rider_types)
 
         if rider_choice != "All":
-            df_for_charts = filter_by_rider_type(df_for_charts, rider_choice)
+            df_timeline = filter_by_rider_type(df_timeline, rider_choice)
 
-        rush_options = sorted(df_for_charts[IS_RUSH_HOUR_COL].unique())
-        # Convert bool to string for presentation
-        rush_options = [str(x) for x in rush_options]
-        rush_options.insert(0, "All")
+        daily_rides = calculate_daily_rides(df_timeline)
 
-        rush_hour_choice = st.sidebar.selectbox(
-            "Select Rush Hour:",
-            options=rush_options,
-            index=0
+        st.plotly_chart(
+            plot_daily_rides(daily_rides),
+            use_container_width=True
         )
 
+    # ============================================================
+    # TAB 2 — DURATION ANALYTICS
+    # ============================================================
+    with tab_duration:
 
-        if rush_hour_choice != "All":
-            target_bool = True if rush_hour_choice == 'True' else False
-            df_for_charts = df_for_charts[df_for_charts[IS_RUSH_HOUR_COL] == target_bool]
+        st.subheader("Trip Duration Analysis")
 
-        # -------------------------------------------
-        # 2. US-7: Advanced Filtering UI
-        # -------------------------------------------
-        st.sidebar.markdown("---")
+        df_duration = df.copy()
 
-        # 1. Duration Slider
-        max_duration = int(df_with_rider_type[DURATION_MIN_COL].max()) + 1
-        duration_range = st.sidebar.slider(
-            'Trip Duration Range (minutes)',
-            min_value=0,
-            max_value=max_duration,
-            value=(0, max_duration),
-            key='main_duration_filter'
+        rider_choice_a = st.selectbox(
+            "Rider Type:",
+            ["All"] + sorted(df[USER_TYPE_COL].unique())
         )
 
-        # 1. Find the absolute min and max date in the data
-        min_data_date = df_for_charts[START_TIME_COL].min().date()  # Extracts the earliest date
-        max_data_date = df_for_charts[START_TIME_COL].max().date()  # Extracts the latest date
+        if rider_choice_a != "All":
+            df_duration = filter_by_rider_type(df_duration, rider_choice_a)
 
-        st.sidebar.subheader("📅 Date Range Filter")
-
-        # Create two columns within the sidebar for the date inputs
-        date_col1, date_col2 = st.sidebar.columns(2)
-
-        # 1. Start Date Input
-        start_date = date_col1.date_input(
-            'Start Date',
-            value=min_data_date,  # Default selection is the earliest date in the data
-            min_value=min_data_date,  # Restrict selection to the earliest date
-            max_value=max_data_date,  # Restrict selection up to the latest date
-            key='start_date_input'
+        st.plotly_chart(
+            plot_duration_histogram(df_duration),
+            use_container_width=True
         )
 
-        # 2. End Date Input
-        end_date = date_col2.date_input(
-            'End Date',
-            value=max_data_date,  # Default selection is the latest date in the data
-            min_value=min_data_date,  # Restrict selection down to the earliest date
-            max_value=max_data_date,  # Restrict selection up to the latest date
-            key='end_date_input'
-        )
-        # Combine the outputs into a tuple for filtering
-        date_range_for_filter = (start_date, end_date)
+    # ============================================================
+    # TAB 3 — STATIONS ANALYTICS
+    # ============================================================
+    with tab_stations:
 
-        st.sidebar.subheader("🕒 Time Range Filter")
-        col1, col2 = st.sidebar.columns(2)
-        # 1. Start Time Input
-        start_time = col1.time_input(
-            'Start Time (HH:mm)',
-            step=timedelta(minutes=1),
-            value=time(0, 0),  # Default to 00:00
-            key='start_time_input'
+        st.subheader("Top Starting Stations")
+
+        top_n = st.slider("Number of Stations:", 3, 20, 10)
+
+        top_df = get_top_starting_stations(df, top_n)
+
+        st.altair_chart(
+            plot_top_stations(top_df, f"Top {top_n} Starting Stations"),
+            use_container_width=True
         )
 
-        # 2. End Time Input
-        end_time = col2.time_input(
-            'End Time (HH:mm)',
-            value=time(23, 59),  # Default to 23:59
-            step=timedelta(minutes=1),
-            key='end_time_input'
+        st.subheader("Station List")
+        st.dataframe(top_df, use_container_width=True)
+
+    # ============================================================
+    # TAB 4 — DATA TABLES
+    # ============================================================
+    with tab_data:
+
+        st.subheader("Dataset Explorer")
+
+        df_filtered = df.copy()
+
+        # Rider Type Filter
+        rider_choice_d = st.selectbox(
+            "Rider Type Filter:",
+            ["All"] + sorted(df[USER_TYPE_COL].unique())
+        )
+        if rider_choice_d != "All":
+            df_filtered = filter_by_rider_type(df_filtered, rider_choice_d)
+
+        # Duration filter
+        max_duration = int(df[DURATION_MIN_COL].max()) + 1
+        duration_range = st.slider(
+            "Trip Duration (min)",
+            0, max_duration, (0, max_duration)
         )
 
-        # 3. Apply US-7 Advanced Filter (Crucial Chaining Step)
-        if df_for_charts.empty:
-            st.warning("No rides match the current filter selection.")
-            st.stop()
+        # Date filter
+        min_date = df[START_TIME_COL].min().date()
+        max_date = df[START_TIME_COL].max().date()
 
-        # Extract the time component from the full datetime objects returned by the slider
-        time_range_for_filter = (start_time, end_time)
-        df_for_charts = filter_data_advanced(
-            df=df_for_charts,
-            # Pass the tuple of time objects directly
-            start_time_range=time_range_for_filter,
+        col1, col2 = st.columns(2)
+        date_start = col1.date_input("Start Date", min_date)
+        date_end = col2.date_input("End Date", max_date)
+
+        # Time filter
+        col3, col4 = st.columns(2)
+        time_start = col3.time_input("Start Time", time(0, 0))
+        time_end = col4.time_input("End Time", time(23, 59))
+
+        df_filtered = filter_data_advanced(
+            df=df_filtered,
+            start_time_range=(time_start, time_end),
             min_duration=float(duration_range[0]),
             max_duration=float(duration_range[1]),
-            start_date=date_range_for_filter[0],  # Pass start date
-            end_date=date_range_for_filter[1]  # Pass end date
+            start_date=date_start,
+            end_date=date_end
         )
 
+        st.write(f"### Showing {len(df_filtered):,} filtered rides")
+        st.dataframe(df_filtered, use_container_width=True)
 
 
-        # FINAL CHECK
-        if df_for_charts.empty:
-            st.error("No rides match the final filter criteria.")
-            st.stop()
-
-        # -------------------------------------------
-        # Display
-        # -------------------------------------------
-        left_col, right_col = st.columns(2)
-
-        with left_col:
-            st.write(f"### Showing {len(df_for_charts)} rides for: {rider_choice}")
-            st.dataframe(df_for_charts.head(10))
-
-        # -------------------------------------------
-        # Display the figure with all the rides accordingly to type of user
-        # -------------------------------------------
-        with right_col:
-            daily_rides = calculate_daily_rides(df_for_charts)
-            fig = plot_daily_rides(daily_rides)
-            st.plotly_chart(fig, use_container_width=False)
-
-            # -------------------------------------------
-            # Task 8.3: US-8 Chart Integration
-            # -------------------------------------------
-            st.markdown("---")
-            st.subheader("Trip Duration Comparison by Rider Type (US-8)")
-
-            # 1. Call the new plotting function
-            duration_fig = plot_duration_histogram(df_for_charts)
-
-            # 2. Display the Plotly figure
-            st.plotly_chart(duration_fig, use_container_width=False)
-
-
-        hist_values = np.histogram(df_for_charts[START_TIME_COL].dt.hour, bins=24, range=(0,24))[0]
-        st.bar_chart(hist_values)
-
-        
-        # -------------------------------------------
-        # NEW SECTION: Top Starting Stations Analysis
-        # -------------------------------------------
-        st.markdown("---")
-        st.header("📍 Top Starting Stations")
-
-        # 1. User input for Top N
-        top_n_stations = st.slider(
-            "Select the number of top stations to analyze:", 
-            min_value=3, 
-            max_value=20, 
-            value=10
-        )
-        
-        # 2. Get the top stations data (DataFrame)
-        top_stations_df = get_top_starting_stations(df_for_charts, top_n=top_n_stations)
-
-        # 3. Generate the Altair Chart object (Figure)
-        station_chart = plot_top_stations(
-            top_stations_df, 
-            title=f"Top {top_n_stations} Busiest Starting Stations"
-        )
-        
-        # 4. Display the chart using st.altair_chart
-        st.altair_chart(station_chart, use_container_width=True)
-
-        st.subheader("Top Stations Data")
-        st.dataframe(top_stations_df)
-
-        
-
-if __name__ == '__main__':
-    # Ensure the data directory exists before trying to access the file
-    if not os.path.exists('data'):
-        os.makedirs('data')
+# ---------------------------------------------------
+# RUN APP
+# ---------------------------------------------------
+if __name__ == "__main__":
+    if not os.path.exists("data"):
+        os.makedirs("data")
     main()
