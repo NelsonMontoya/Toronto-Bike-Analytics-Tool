@@ -113,10 +113,30 @@ html, body, [class*="css"]  {
 }
 
 /* Fix dataframe background */
-[data-testid="stDataFrame"] div {
+/* Fix dataframe background safely */
+[data-testid="stDataFrame"] {
     background-color: #000 !important;
-    color: #FFF !important;
 }
+
+[data-testid="stDataFrame"] > div:nth-child(1) {
+    background-color: #000 !important;
+}
+
+[data-testid="stDataFrame"] th {
+    color: #FFF !important;
+    background-color: #111 !important;
+}
+
+[data-testid="stDataFrame"] td {
+    color: #FFF !important;
+    background-color: #000 !important;
+}
+
+[data-testid="stDataFrame"] table {
+    color: #FFF !important;
+    background-color: #000 !important;
+}
+
 
 /* Fix code blocks if used */
 .stCodeBlock {
