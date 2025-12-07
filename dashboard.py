@@ -148,6 +148,24 @@ html, body, [class*="css"]  {
 st.markdown(DARK_BG, unsafe_allow_html=True)
 
 # ---------------------------------------------------
+# GOLD TITLE STYLE
+# ---------------------------------------------------
+TITLE_CSS = """
+<style>
+h1 {
+    color: #D4AF37 !important;          /* gold color */
+    text-align: left !important;      /* left */
+    font-weight: 800 !important;
+    letter-spacing: 1px !important;
+    margin-top: 10px !important;
+    margin-bottom: 15px !important;
+    text-shadow: 0px 0px 12px rgba(212,175,55,0.35); /* golden glow */
+}
+</style>
+"""
+st.markdown(TITLE_CSS, unsafe_allow_html=True)
+
+# ---------------------------------------------------
 # STREAMLIT CONFIG
 # ---------------------------------------------------
 st.set_page_config(
@@ -164,7 +182,7 @@ def main():
     # --------------------------
     # TITLE
     # --------------------------
-    st.title("Toronto Bike-Sharing Analytics Dashboard")
+    st.title("🚴 Toronto Bike-Sharing Analytics Dashboard")
     st.markdown("Interactive analytics for Toronto Bike Share ridership.")
     st.markdown("---")
 
@@ -222,7 +240,7 @@ def main():
             st.markdown(
                 f"""
                 <div class="kpi-card">
-                    <div class="kpi-card-title">Subscriber Share</div>
+                    <div class="kpi-card-title">Annual Member Trip Share</div>
                     <div class="kpi-card-value">{subscriber_rate:.1f}%</div>
                 </div>
                 """,
