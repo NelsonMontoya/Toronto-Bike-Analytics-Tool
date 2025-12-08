@@ -62,3 +62,8 @@ or similar providers. Data files are expected to be in a directory (e.g., `./dat
 * `data_loader.py` (Hypothetical): Contains functions for fetching and cleaning the raw data.
 * `requirements.txt`: Lists all necessary Python dependencies.
 * `data/`: Directory where the raw CSV data files should be placed.
+
+### Deployed App
+
+The app was also deployed to streamlite.  You can see it using this link 
+https://toronto-bike-analytics-tool-kuh8hahoazghymgbrxnf5a.streamlit.app/
