@@ -14,7 +14,7 @@ from src.analytics.plot_top_stations import plot_top_stations
 
 from src.config import URL, USER_TYPE_COL, DURATION_MIN_COL, START_TIME_COL, IS_RUSH_HOUR_COL
 
-
+# version 2.0
 # ---------------------------------------------------
 # CUSTOM CSS – MODERN LONG TABS
 # ---------------------------------------------------
