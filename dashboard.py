@@ -97,23 +97,18 @@ st.markdown(KPI_CARD_CSS, unsafe_allow_html=True)
 # ---------------------------------------------------
 DARK_BG = """
 <style>
-/* Main app background */
 .stApp {
     background-color: #000000 !important;
 }
 
-/* Text color default */
 html, body, [class*="css"]  {
     color: #FFFFFF !important;
 }
 
-/* Remove white blocks */
 .block-container {
     background-color: #000000 !important;
 }
 
-/* Fix dataframe background */
-/* Fix dataframe background safely */
 [data-testid="stDataFrame"] {
     background-color: #000 !important;
 }
@@ -137,8 +132,6 @@ html, body, [class*="css"]  {
     background-color: #000 !important;
 }
 
-
-/* Fix code blocks if used */
 .stCodeBlock {
     background-color: #111 !important;
     color: white !important;
@@ -153,13 +146,13 @@ st.markdown(DARK_BG, unsafe_allow_html=True)
 TITLE_CSS = """
 <style>
 h1 {
-    color: #D4AF37 !important;          /* gold color */
-    text-align: left !important;      /* left */
+    color: #D4AF37 !important;
+    text-align: left !important;
     font-weight: 800 !important;
     letter-spacing: 1px !important;
     margin-top: 10px !important;
     margin-bottom: 15px !important;
-    text-shadow: 0px 0px 12px rgba(212,175,55,0.35); /* golden glow */
+    text-shadow: 0px 0px 12px rgba(212,175,55,0.35);
 }
 </style>
 """
@@ -179,24 +172,18 @@ st.set_page_config(
 # ---------------------------------------------------
 def main():
 
-    # --------------------------
     # TITLE
-    # --------------------------
     st.title("🚴 Toronto Bike-Sharing Analytics Dashboard")
     st.markdown("Interactive analytics for Toronto Bike Share ridership.")
     st.markdown("---")
 
-    # --------------------------
     # DATA PIPELINE
-    # --------------------------
     raw = prepare_data(URL)
     df = categorize_riders(raw)
     df = label_rush_hour(df)
     df = calculate_trip_metrics(df)
 
-    # --------------------------
-    # TABS IN FINAL ORDER
-    # --------------------------
+    # TABS
     tab_timeline, tab_duration, tab_stations, tab_data = st.tabs(
         ["Timeline & KPIs", "Duration Analytics", "Stations Analytics", "Data Tables"]
     )
@@ -262,7 +249,7 @@ def main():
 
         st.plotly_chart(
             plot_daily_rides(daily_rides),
-            use_container_width=True
+            width="stretch"
         )
 
     # ============================================================
@@ -284,7 +271,7 @@ def main():
 
         st.plotly_chart(
             plot_duration_histogram(df_duration),
-            use_container_width=True
+            width="stretch"
         )
 
     # ============================================================
@@ -300,11 +287,11 @@ def main():
 
         st.altair_chart(
             plot_top_stations(top_df, f"Top {top_n} Starting Stations"),
-            use_container_width=True
+            width="stretch"
         )
 
         st.subheader("Station List")
-        st.dataframe(top_df, use_container_width=True)
+        st.dataframe(top_df, width="stretch")
 
     # ============================================================
     # TAB 4 — DATA TABLES
@@ -315,7 +302,6 @@ def main():
 
         df_filtered = df.copy()
 
-        # Rider Type Filter
         rider_choice_d = st.selectbox(
             "Rider Type Filter:",
             ["All"] + sorted(df[USER_TYPE_COL].unique())
@@ -323,14 +309,12 @@ def main():
         if rider_choice_d != "All":
             df_filtered = filter_by_rider_type(df_filtered, rider_choice_d)
 
-        # Duration filter
         max_duration = int(df[DURATION_MIN_COL].max()) + 1
         duration_range = st.slider(
             "Trip Duration (min)",
             0, max_duration, (0, max_duration)
         )
 
-        # Date filter
         min_date = df[START_TIME_COL].min().date()
         max_date = df[START_TIME_COL].max().date()
 
@@ -338,7 +322,6 @@ def main():
         date_start = col1.date_input("Start Date", min_date)
         date_end = col2.date_input("End Date", max_date)
 
-        # Time filter
         col3, col4 = st.columns(2)
         time_start = col3.time_input("Start Time", time(0, 0))
         time_end = col4.time_input("End Time", time(23, 59))
@@ -353,7 +336,7 @@ def main():
         )
 
         st.write(f"### Showing {len(df_filtered):,} filtered rides")
-        st.dataframe(df_filtered, use_container_width=True)
+        st.dataframe(df_filtered, width="stretch")
 
 
 # ---------------------------------------------------

@@ -102,4 +102,3 @@ To run all automated tests implemented using the pytest framework:
 ```bash
 pytest
  ```
-
