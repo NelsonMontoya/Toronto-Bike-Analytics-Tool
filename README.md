@@ -103,7 +103,3 @@ To run all automated tests implemented using the pytest framework:
 pytest
  ```
 
-### Deployed App
-
-The app was also deployed to streamlite.  You can see it using this link 
-https://toronto-bike-analytics-tool-kuh8hahoazghymgbrxnf5a.streamlit.app
